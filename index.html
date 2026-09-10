@@ -2,36 +2,38 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>App Boquinhas Interativo</title>
+<title>App – Leitura, Boquinhas e Matemática</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="manifest" href="manifest.json">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 <style>
     body { font-family: Arial, sans-serif; background: #fff8d6; margin: 0; }
     header { background: #f7c948; padding: 20px; text-align: center; font-size: 24px; font-weight: bold; }
-    section { display: none; padding: 20px; padding-bottom: 80px; }
+    nav { display: flex; flex-wrap: wrap; justify-content: space-around; background: #ffe9a8; padding: 10px; }
+    nav button { padding: 10px 15px; border: none; background: #f7c948; border-radius: 8px; font-size: 16px; cursor: pointer; margin: 4px; }
+    section { display: none; padding: 20px; }
     .active { display: block; }
-    .card { background: #fff; padding: 15px; margin: 15px 0; border-radius: 12px; box-shadow: 0 0 10px #00000020; }
     img.boquinha { width: 150px; margin: 10px; border-radius: 12px; box-shadow: 0 0 10px #00000020; cursor: pointer; }
-    footer { position: fixed; bottom: 0; left: 0; width: 100%; background: #f7c948; display: flex; justify-content: space-around; padding: 10px 0; box-shadow: 0 -2px 10px #00000030; }
-    footer button { background: none; border: none; font-size: 16px; font-weight: bold; color: #5a4100; cursor: pointer; }
+    .card { background: #fff; padding: 15px; margin: 15px 0; border-radius: 12px; box-shadow: 0 0 10px #00000020; }
     .highlight { background: #ffd54f; padding: 2px 4px; border-radius: 4px; }
     .correct { color: green; font-weight: bold; }
     .wrong { color: red; font-weight: bold; }
     input[type="number"] { padding: 6px; border-radius: 6px; border: 1px solid #ccc; width: 80px; }
 </style>
-<script>
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js');
-}
-</script>
 </head>
 
 <body>
 
-<header class="animate__animated animate__fadeInDown">App Boquinhas Interativo</header>
+<header>App – Leitura, Boquinhas e Matemática</header>
 
-<section id="pais" class="active animate__animated animate__fadeIn">
+<nav>
+    <button onclick="show('pais')">Pais</button>
+    <button onclick="show('aquecimento')">Aquecimento</button>
+    <button onclick="show('articulacao')">Articulação</button>
+    <button onclick="show('leitura')">Leitura</button>
+    <button onclick="show('boquinhas')">Boquinhas</button>
+    <button onclick="show('matematica')">Matemática</button>
+</nav>
+
+<section id="pais" class="active">
     <h2>Orientações para os Pais</h2>
     <div class="card">
         <p>Reserve 5 a 10 minutos por dia para as atividades.</p>
@@ -41,64 +43,98 @@ if ('serviceWorker' in navigator) {
     </div>
 </section>
 
-<section id="aquecimento" class="animate__animated animate__fadeIn">
+<section id="aquecimento">
     <h2>Aquecimento de Voz</h2>
     <div class="card">
-        <p>Clique em uma vogal para ouvir e ver o som:</p>
-        <button onclick="animarEBaterSom('A')">A</button>
-        <button onclick="animarEBaterSom('E')">E</button>
-        <button onclick="animarEBaterSom('I')">I</button>
-        <button onclick="animarEBaterSom('O')">O</button>
-        <button onclick="animarEBaterSom('U')">U</button>
+        <p>Clique em uma vogal para treinar o som:</p>
+        <button onclick="playVowel('A')">A</button>
+        <button onclick="playVowel('E')">E</button>
+        <button onclick="playVowel('I')">I</button>
+        <button onclick="playVowel('O')">O</button>
+        <button onclick="playVowel('U')">U</button>
         <p id="vowelOutput"></p>
     </div>
 </section>
 
-<section id="leitura" class="animate__animated animate__fadeIn">
-    <h2>Leitura com Sílabas Arrastáveis</h2>
+<section id="articulacao">
+    <h2>Articulação das Palavras</h2>
     <div class="card">
-        <p>Arraste as sílabas para formar palavras:</p>
-        <div id="dragArea"></div>
-        <div id="dropZone">Arraste as sílabas aqui</div>
+        <p>Escolha uma vogal para ver palavras:</p>
+        <select id="vowelSelect" onchange="showWords()">
+            <option value="">Selecione</option>
+            <option value="A">A</option>
+            <option value="E">E</option>
+            <option value="I">I</option>
+            <option value="O">O</option>
+            <option value="U">U</option>
+        </select>
+        <p id="wordsOutput"></p>
     </div>
 </section>
 
-<section id="boquinhas" class="animate__animated animate__fadeIn">
+<section id="leitura">
+    <h2>Método de Leitura por Letras e Sílabas</h2>
+    <div class="card">
+        <p>Texto:</p>
+        <p id="textExample">
+            <span data-letter="O" class="highlight">O</span> 
+            <span data-silaba="so" class="highlight">so</span>rriso da 
+            <span data-letter="U" class="highlight">U</span>va é do 
+            <span data-letter="A" class="highlight">A</span>mor.
+        </p>
+        <p>Peça para a criança clicar nas partes destacadas e dizer o som.</p>
+        <p id="clickFeedback"></p>
+    </div>
+</section>
+
+<section id="boquinhas">
     <h2>Boquinhas das Vogais</h2>
     <p>Clique na boquinha para ver o som correspondente:</p>
-    <img class="boquinha animate__animated animate__pulse" src="boquinha_A.png" alt="Boquinha A" onclick="showBoquinhaSound('A')">
-    <img class="boquinha animate__animated animate__pulse" src="boquinha_E.png" alt="Boquinha E" onclick="showBoquinhaSound('E')">
-    <img class="boquinha animate__animated animate__pulse" src="boquinha_I.png" alt="Boquinha I" onclick="showBoquinhaSound('I')">
-    <img class="boquinha animate__animated animate__pulse" src="boquinha_O.png" alt="Boquinha O" onclick="showBoquinhaSound('O')">
-    <img class="boquinha animate__animated animate__pulse" src="boquinha_U.png" alt="Boquinha U" onclick="showBoquinhaSound('U')">
+
+    <!-- Substitua os src pelos arquivos PNG reais -->
+    <img class="boquinha" src="boquinha_A.png" alt="Boquinha A" onclick="showBoquinhaSound('A')">
+    <img class="boquinha" src="boquinha_E.png" alt="Boquinha E" onclick="showBoquinhaSound('E')">
+    <img class="boquinha" src="boquinha_I.png" alt="Boquinha I" onclick="showBoquinhaSound('I')">
+    <img class="boquinha" src="boquinha_O.png" alt="Boquinha O" onclick="showBoquinhaSound('O')">
+    <img class="boquinha" src="boquinha_U.png" alt="Boquinha U" onclick="showBoquinhaSound('U')">
+
     <p id="boquinhaOutput"></p>
 </section>
 
-<section id="matematica" class="animate__animated animate__fadeIn">
-    <h2>Matemática com Leitura</h2>
+<section id="matematica">
+    <h2>Matemática – Números com Leitura</h2>
+
     <div class="card">
-        <h3>Soma com Leitura</h3>
+        <h3>Atividade 1 – Contagem com Sílabas</h3>
+        <p id="contagemSilabasTexto"></p>
+        <button onclick="novaContagemSilabas()">Nova atividade</button>
+    </div>
+
+    <div class="card">
+        <h3>Atividade 2 – Número e Palavra</h3>
+        <p id="numeroPalavraPergunta"></p>
+        <button onclick="novaNumeroPalavra()">Nova atividade</button>
+    </div>
+
+    <div class="card">
+        <h3>Atividade 3 – Soma com Leitura</h3>
         <p id="somaLeituraPergunta"></p>
         <input type="number" id="somaLeituraResposta" placeholder="?">
         <button onclick="verificarSomaLeitura()">Verificar</button>
         <p id="somaLeituraFeedback"></p>
         <button onclick="novaSomaLeitura()">Nova soma</button>
     </div>
+
+    <div class="card">
+        <h3>Atividade 4 – Comparar Números com Palavras</h3>
+        <p id="compararLeituraPergunta"></p>
+        <button onclick="responderCompararLeitura('<')">&lt;</button>
+        <button onclick="responderCompararLeitura('=')">=</button>
+        <button onclick="responderCompararLeitura('>')">&gt;</button>
+        <p id="compararLeituraFeedback"></p>
+        <button onclick="novaComparacaoLeitura()">Nova comparação</button>
+    </div>
 </section>
-
-<footer>
-    <button onclick="show('pais')">Pais</button>
-    <button onclick="show('aquecimento')">Aquecimento</button>
-    <button onclick="show('leitura')">Leitura</button>
-    <button onclick="show('boquinhas')">Boquinhas</button>
-    <button onclick="show('matematica')">Matemática</button>
-</footer>
-
-<audio id="somA" src="sons/A.mp3"></audio>
-<audio id="somE" src="sons/E.mp3"></audio>
-<audio id="somI" src="sons/I.mp3"></audio>
-<audio id="somO" src="sons/O.mp3"></audio>
-<audio id="somU" src="sons/U.mp3"></audio>
 
 <script>
 function show(id) {
@@ -106,17 +142,47 @@ function show(id) {
     document.getElementById(id).classList.add("active");
 }
 
-function tocarSom(vogal) {
-    document.getElementById("som" + vogal).play();
+// Aquecimento
+function playVowel(v) {
+    const map = {
+        A: "aaaaa (boca aberta)",
+        E: "eeeee (sorriso leve)",
+        I: "iiiii (sorriso mais fechado)",
+        O: "ooooo (boca arredondada)",
+        U: "uuuuu (biquinho bem fechado)"
+    };
+    document.getElementById("vowelOutput").textContent = "Som da vogal " + v + ": " + map[v];
 }
 
-function animarEBaterSom(vogal) {
-    const botao = document.querySelector(`button[onclick="animarEBaterSom('${vogal}')"]`);
-    botao.classList.add("animate__animated", "animate__pulse");
-    tocarSom(vogal);
-    setTimeout(() => botao.classList.remove("animate__animated", "animate__pulse"), 1000);
+// Articulação
+function showWords() {
+    const v = document.getElementById("vowelSelect").value;
+    const out = document.getElementById("wordsOutput");
+    const words = {
+        A: "Avião, Abelha, Amor",
+        E: "Elefante, Escada, Escola",
+        I: "Igreja, Inseto, Ilha",
+        O: "Ovo, Olho, Onda",
+        U: "Uva, Urso, Universo"
+    };
+    out.textContent = v ? "Palavras com " + v + ": " + words[v] : "";
 }
 
+// Leitura – clique nas partes destacadas
+document.querySelectorAll("#textExample .highlight").forEach(el => {
+    el.addEventListener("click", () => {
+        const letter = el.getAttribute("data-letter");
+        const silaba = el.getAttribute("data-silaba");
+        const fb = document.getElementById("clickFeedback");
+        if (letter) {
+            fb.textContent = "Você clicou na letra: " + letter + ". Peça para a criança dizer o som de " + letter + ".";
+        } else if (silaba) {
+            fb.textContent = "Você clicou na sílaba: " + silaba + ". Peça para a criança dizer o som de " + silaba + ".";
+        }
+    });
+});
+
+// Boquinhas
 function showBoquinhaSound(v) {
     const desc = {
         A: "Boca aberta, som de A.",
@@ -128,23 +194,89 @@ function showBoquinhaSound(v) {
     document.getElementById("boquinhaOutput").textContent = "Boquinha da vogal " + v + ": " + desc[v];
 }
 
-function criarSilabasDrag() {
-    const silabas = ["ma", "pa", "la", "so", "lu"];
-    const area = document.getElementById("dragArea");
-    silabas.forEach(s => {
-        const el = document.createElement("div");
-        el.textContent = s;
-        el.draggable = true;
-        el.style.padding = "10px";
-        el.style.background = "#f7c948";
-        el.style.borderRadius = "8px";
-        el.style.cursor = "grab";
-        el.addEventListener("dragstart", e => e.dataTransfer.setData("text", s));
-        area.appendChild(el);
-    });
-    const destino = document.getElementById("dropZone");
-    destino.addEventListener("dragover", e => e.preventDefault());
-    destino.addEventListener("drop", e => {
-        e.preventDefault();
-        const s = e.dataTransfer.getData("text");
-        destino.textContent += " " + s;
+// Matemática – contagem com sílabas
+function novaContagemSilabas() {
+    const palavras = ["so", "la", "ma", "pa", "lu", "re", "ti", "vo"];
+    const n = Math.floor(Math.random() * 5) + 3; // 3 a 7
+    let texto = "Conte as sílabas: ";
+    let lista = [];
+    for (let i = 0; i < n; i++) {
+        const s = palavras[Math.floor(Math.random() * palavras.length)];
+        lista.push(s);
+    }
+    texto += lista.join(" – ");
+    texto += "<br><br>Total de sílabas: " + n;
+    document.getElementById("contagemSilabasTexto").innerHTML = texto;
+}
+
+// Matemática – número + palavra
+function novaNumeroPalavra() {
+    const palavras = ["uva", "olho", "pato", "lata", "sapo", "foca"];
+    const n = Math.floor(Math.random() * 9) + 1;
+    const palavra = palavras[Math.floor(Math.random() * palavras.length)];
+    document.getElementById("numeroPalavraPergunta").innerHTML =
+        "Número: <strong>" + n + "</strong><br>Palavra: <strong>" + palavra + "</strong><br><br>" +
+        "Peça para a criança ler a palavra e depois contar até " + n + ".";
+}
+
+// Matemática – soma com leitura
+let somaA_leitura = 0, somaB_leitura = 0;
+function novaSomaLeitura() {
+    const palavras = ["sol", "pato", "lata", "foca", "uva"];
+    somaA_leitura = Math.floor(Math.random() * 10);
+    somaB_leitura = Math.floor(Math.random() * 10);
+    const palavra = palavras[Math.floor(Math.random() * palavras.length)];
+    document.getElementById("somaLeituraPergunta").innerHTML =
+        "Leia a palavra: <strong>" + palavra + "</strong><br><br>" +
+        "Agora resolva: <strong>" + somaA_leitura + " + " + somaB_leitura + "</strong>";
+    document.getElementById("somaLeituraResposta").value = "";
+    document.getElementById("somaLeituraFeedback").textContent = "";
+}
+function verificarSomaLeitura() {
+    const resp = parseInt(document.getElementById("somaLeituraResposta").value, 10);
+    const fb = document.getElementById("somaLeituraFeedback");
+    if (resp === somaA_leitura + somaB_leitura) {
+        fb.textContent = "Correto! Excelente leitura e cálculo!";
+        fb.className = "correct";
+    } else {
+        fb.textContent = "Ainda não. Tente novamente.";
+        fb.className = "wrong";
+    }
+}
+
+// Matemática – comparação com palavras
+let compA_leitura = 0, compB_leitura = 0;
+function novaComparacaoLeitura() {
+    const palavras = ["sol", "uva", "pato", "lata", "foca"];
+    const palavra = palavras[Math.floor(Math.random() * palavras.length)];
+    compA_leitura = Math.floor(Math.random() * 10);
+    compB_leitura = Math.floor(Math.random() * 10);
+    document.getElementById("compararLeituraPergunta").innerHTML =
+        "Leia a palavra: <strong>" + palavra + "</strong><br><br>" +
+        "Agora compare: <strong>" + compA_leitura + " ? " + compB_leitura + "</strong>";
+    document.getElementById("compararLeituraFeedback").textContent = "";
+}
+function responderCompararLeitura(simbolo) {
+    const fb = document.getElementById("compararLeituraFeedback");
+    let correto;
+    if (simbolo === "<") correto = compA_leitura < compB_leitura;
+    if (simbolo === "=") correto = compA_leitura === compB_leitura;
+    if (simbolo === ">") correto = compA_leitura > compB_leitura;
+    if (correto) {
+        fb.textContent = "Correto! Ótima leitura e comparação.";
+        fb.className = "correct";
+    } else {
+        fb.textContent = "Não é essa relação. Tente outra.";
+        fb.className = "wrong";
+    }
+}
+
+// inicializar
+novaContagemSilabas();
+novaNumeroPalavra();
+novaSomaLeitura();
+novaComparacaoLeitura();
+</script>
+
+</body>
+</html>
